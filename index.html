@@ -29,9 +29,10 @@
        <a-plane transparent ="true" width="1000" height="1000" src="#matrix" position="0 50 0" side="double" repeat="10 10" rotation="-90 0 0"></a-plane>
         
         <!--  GOAL      -->
-        <a-plane id="goal" position="0 0 -336.2578594712859" opacity="0.7" width="10" height="1000" color="yellow"></a-plane>
+        <a-plane id="goal" position="0 0 -336.2578594712859" opacity="0.7" width="20" height="1000" color="yellow"></a-plane>
         
         <a-camera position="0 0 50" wasd-controls="enabled:false" >
+            <a-entity id="text" position="-2 3 -5"  text="value: This text will be 4 units wide.; width:6; align:center" ></a-entity>
             <a-entity class="sounds" id="bgMusic" sound="src: #techno; autoplay:true; loop:true; volume:0.3;"></a-entity>
             <a-entity class="sounds" id="hit" sound="src: #crash; autoplay:false;"></a-entity>
             <a-entity class="sounds" id="coin" sound="src: #coinSound; autoplay:false;"></a-entity>
@@ -48,10 +49,14 @@
     </a-scene>
     
     <script>
-        
+    
+      //to get text value
+      //text.components.text.attrValue.value
+      //textBox.setAttribute("text",{value:"pokemon"})
       var camera = document.querySelector("a-camera")
       var scene = document.querySelector("a-scene")
-      var goal = document.querySelector("#goal")
+      var goal = document.querySelector("#goal");
+      var textBox = document.querySelector("#text")
       var moveLeft = false;
       var moveRight = false;
       var startMoving = true;
@@ -59,8 +64,9 @@
       var rightXCheck = 40;
       var enemies = [];
       var coins = [];
+      var numCoins = 0;
       var colors = ["#bf3eff","#ddcec4","#aa99ae","#b40000","#cb9b37","#98877b","#a998ae","#c3e198","#f2f1e7"]
-      var minDistance = 1;
+      var minDistance = 1.5;
         
       var sounds = document.querySelectorAll(".sounds");
       var update = null;
@@ -69,9 +75,10 @@
         
       window.onload=function(){
       
+          
           addEnemies();
           addCoins();
-          
+          textBox.setAttribute("text",{value: "Coins:" + numCoins.toString(),width:10,height:2,align:"center"})
 
           
           update = setInterval(function(){
@@ -114,7 +121,7 @@
             
           },60)
           
-              
+            
       }
       
       
@@ -166,8 +173,20 @@
               setCameraPosition(0,currentPosition.y,currentPosition.z)
           }
           
-          if(getCameraPosition().z <= -400){
-              console.log("at the end")
+          if(getCameraPosition().z <= -336.2578594712859){
+              //console.log("at the end")
+              goal = document.querySelector("#goal")
+              goal.setAttribute("visible",false)
+              textBox.setAttribute("text",{value: "You escaped and no longer lost", align:"center"})
+              startMoving=false;
+              clearInterval(update);
+              setTimeout(function(){
+                  //kill music
+                  sounds.forEach(function(sound){
+                      sound.components.sound.stopSound()
+                  })
+              },1000)
+              
           }
       }
       
@@ -211,8 +230,9 @@
 
               //console.log("collided")
               if(object.getAttribute("id") == "goal"){
+                  object.setAttribute("visible","false")
                   //console.log('collided with goal')
-              
+                  textBox.setAttribute("text",{value: "You escaped and no longer lost", align:"center"})
               }else{
                   //console.log("collided with building")
                   hitSound = document.querySelector("#hit")
@@ -229,10 +249,20 @@
                       sound.components.sound.stopSound()
                   })
               },1000)
-          }else if(xDiff <= minDistance && zDiff <= minDistance && object.getAttribute("class") == "coin"){
+          }
+          
+          if(xDiff <= minDistance && zDiff <= minDistance && (object.getAttribute("class") == "coin" && object.getAttribute("visible") == true)){
+                //remove it
+                //object.parentNode.removeChild(object);
+              
+                object.setAttribute("visible",false)
                   //console.log("collided with coin")
                 coinSound = document.querySelector("#coin")
                 coinSound.components.sound.playSound();
+                numCoins++;
+                //remove it
+                
+                textBox.setAttribute("text",{value: "Coins:" + numCoins.toString(),width:10,height:2,align:"center"})
           }
           
       }
