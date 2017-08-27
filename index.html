@@ -1,7 +1,10 @@
 <html>
   <head>
+<!--
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.6.1/aframe-master.min.js"></script>
+-->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.5.0/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
@@ -11,6 +14,9 @@
            <img src="images/building2.png" id="building2">
            <img src="images/matrix.png" id="matrix">
            <img src="images/yellow.jpg" id="yellow">
+           <img src="images/blue.jpg" id="blue">
+           <audio id="techno" src="sounds/techno.mp3" preload="auto"></audio>
+           <audio id="crash" src="sounds/hit.mp3" preload="auto"></audio>
        </a-assets>
        
         <a-sky color="#000"></a-sky>
@@ -21,35 +27,52 @@
        
        <a-plane transparent ="true" width="1000" height="1000" src="#matrix" position="0 50 0" side="double" repeat="10 10" rotation="-90 0 0"></a-plane>
         
+        <!--  GOAL      -->
+        <a-plane id="goal" position="0 0 -336.2578594712859" opacity="0.7" width="10" height="1000" color="yellow"></a-plane>
         
-        
-        <a-camera position="0 0 50" wasd-controls="acceleration:1000">
+        <a-camera position="0 0 50" wasd-controls="enabled:false" >
+            <a-entity class="sounds" id="bgMusic" sound="src: #techno; autoplay:true; loop:true"></a-entity>
+            <a-entity class="sounds" id="hit" sound="src: #crash; autoplay:false;"></a-entity>
             <a-cursor></a-cursor>
         </a-camera>
+        
+<!--        <a-circle src="images/yellow.jpg" radius="5" rotation="-90 0 0" position="0 0 35"></a-circle>-->
+<!--        <a-circle src="images/yellow.jpg" radius="0.3" position="0 1 35"></a-circle>-->
+        
+    
+      
+        
+        
     </a-scene>
     
     <script>
         
       var camera = document.querySelector("a-camera")
       var scene = document.querySelector("a-scene")
+      var goal = document.querySelector("#goal")
       var moveLeft = false;
       var moveRight = false;
       var startMoving = true;
       var leftXCheck = -40;
       var rightXCheck = 40;
       var enemies = [];
+      var coins = [];
       var colors = ["#bf3eff","#ddcec4","#aa99ae","#b40000","#cb9b37","#98877b","#a998ae","#c3e198","#f2f1e7"]
       var minDistance = 1;
+        
+      var sounds = document.querySelectorAll(".sounds");
+      var update = null;
       
       
         
       window.onload=function(){
       
           addEnemies();
+          addCoins();
           
 
           
-          var update = setInterval(function(){
+          update = setInterval(function(){
             cameraEdgeCheck();
             moveCamera()
               
@@ -57,11 +80,11 @@
             if(startMoving){
                 current = getCameraPosition();
                 if(moveLeft){
-                    console.log("true")
+                    //console.log("true")
                     setCameraPosition(current.x-=0.8,current.y,current.z)
                 }
                 if(moveRight){
-                    console.log("true")
+                    //console.log("true")
                     setCameraPosition(current.x+=0.8,current.y,current.z)
                 }
                 setCameraPosition(current.x,current.y,current.z-=0.8)
@@ -74,7 +97,11 @@
                 camera = document.querySelector("a-camera")
                 checkCollision(camera,enemy)
 
-              })
+              });
+              
+            camera = document.querySelector("a-camera")
+            goal = document.querySelector("#goal")
+            checkCollision(camera,goal)
             
             
           },60)
@@ -145,6 +172,22 @@
           }
       }
       
+      var addCoins = function(){
+          for(var i = 0; i < 30; i++){
+              var coin = document.createElement("a-circle")
+              coin.setAttribute("radius","0.5")
+              coin.setAttribute("position",{x:Math.floor(Math.random() * 40) * (Math.random() <= 0.5 ? 1 : -1),y:1, z:i * (-10)})
+//              coin.setAttribute("src","#blue")
+//              coin.setAttribute("transparent","true")
+              coin.setAttribute("color","yellow")
+              coin.setAttribute("opacity","0.5")
+              coins.push(coin)
+              scene.appendChild(coin)
+             
+
+          }
+      }
+      
       var checkCollision = function(player,object){
           var playerPosition = player.getAttribute("position");
           var objectPosition = object.getAttribute("position");
@@ -152,10 +195,31 @@
           var zDiff = Math.abs(playerPosition.z - objectPosition.z)
           
           if(xDiff <= minDistance && zDiff <= minDistance){
+
               //console.log("collided")
-              startMoving = false
+              if(object.getAttribute("id") == "goal"){
+                  //console.log('collided with goal')
+              }else{
+                  //console.log("collided with building")
+                  hitSound = document.querySelector("#hit")
+                  hitSound.components.sound.playSound();
+              }
+              startMoving = false;
+              
+              
+              
+              clearInterval(update);
+              setTimeout(function(){
+                  //kill music
+                  sounds.forEach(function(sound){
+                      sound.components.sound.stopSound()
+                  })
+              },1000)
           }
+          
       }
+      
+      
       
       
     
