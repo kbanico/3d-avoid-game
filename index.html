@@ -17,6 +17,7 @@
            <img src="images/blue.jpg" id="blue">
            <audio id="techno" src="sounds/techno.mp3" preload="auto"></audio>
            <audio id="crash" src="sounds/hit.mp3" preload="auto"></audio>
+           <audio id="coinSound" src="sounds/coin.mp3" preload="auto"></audio>
        </a-assets>
        
         <a-sky color="#000"></a-sky>
@@ -31,8 +32,9 @@
         <a-plane id="goal" position="0 0 -336.2578594712859" opacity="0.7" width="10" height="1000" color="yellow"></a-plane>
         
         <a-camera position="0 0 50" wasd-controls="enabled:false" >
-            <a-entity class="sounds" id="bgMusic" sound="src: #techno; autoplay:true; loop:true"></a-entity>
+            <a-entity class="sounds" id="bgMusic" sound="src: #techno; autoplay:true; loop:true; volume:0.3;"></a-entity>
             <a-entity class="sounds" id="hit" sound="src: #crash; autoplay:false;"></a-entity>
+            <a-entity class="sounds" id="coin" sound="src: #coinSound; autoplay:false;"></a-entity>
             <a-cursor></a-cursor>
         </a-camera>
         
@@ -99,6 +101,12 @@
 
               });
               
+            coins.forEach(function(coin){
+                camera = document.querySelector("a-camera")
+                checkCollision(camera,coin)
+
+              });
+              
             camera = document.querySelector("a-camera")
             goal = document.querySelector("#goal")
             checkCollision(camera,goal)
@@ -157,6 +165,10 @@
               var currentPosition = getCameraPosition()
               setCameraPosition(0,currentPosition.y,currentPosition.z)
           }
+          
+          if(getCameraPosition().z <= -400){
+              console.log("at the end")
+          }
       }
       
       var addEnemies = function(){
@@ -181,6 +193,7 @@
 //              coin.setAttribute("transparent","true")
               coin.setAttribute("color","yellow")
               coin.setAttribute("opacity","0.5")
+              coin.setAttribute("class","coin")
               coins.push(coin)
               scene.appendChild(coin)
              
@@ -194,11 +207,12 @@
           var xDiff = Math.abs(playerPosition.x - objectPosition.x)
           var zDiff = Math.abs(playerPosition.z - objectPosition.z)
           
-          if(xDiff <= minDistance && zDiff <= minDistance){
+          if(xDiff <= minDistance && zDiff <= minDistance && object.getAttribute("class") !== "coin"){
 
               //console.log("collided")
               if(object.getAttribute("id") == "goal"){
                   //console.log('collided with goal')
+              
               }else{
                   //console.log("collided with building")
                   hitSound = document.querySelector("#hit")
@@ -215,6 +229,10 @@
                       sound.components.sound.stopSound()
                   })
               },1000)
+          }else if(xDiff <= minDistance && zDiff <= minDistance && object.getAttribute("class") == "coin"){
+                  //console.log("collided with coin")
+                coinSound = document.querySelector("#coin")
+                coinSound.components.sound.playSound();
           }
           
       }
