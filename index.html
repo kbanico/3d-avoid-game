@@ -31,6 +31,8 @@
         <!--  GOAL      -->
         <a-plane id="goal" position="0 0 -336.2578594712859" opacity="0.7" width="20" height="1000" color="yellow"></a-plane>
         
+        <!--  Instructions      -->
+        
         <a-camera position="0 0 50" wasd-controls="enabled:false" >
             <a-entity id="text" position="-2 3 -5"  text="value: This text will be 4 units wide.; width:6; align:center" ></a-entity>
             <a-entity class="sounds" id="bgMusic" sound="src: #techno; autoplay:true; loop:true; volume:0.3;"></a-entity>
@@ -173,7 +175,9 @@
               setCameraPosition(0,currentPosition.y,currentPosition.z)
           }
           
-          if(getCameraPosition().z <= -336.2578594712859){
+          goalPosition = goal.getAttribute("position")
+          
+          if(getCameraPosition().z <= -336.2578594712859 && Math.abs(getCameraPosition().x - goalPosition.x) <= 4){
               //console.log("at the end")
               goal = document.querySelector("#goal")
               goal.setAttribute("visible",false)
@@ -187,6 +191,23 @@
                   })
               },1000)
               
+          }else if(getCameraPosition().z <= -336.2578594712859 && Math.abs(getCameraPosition().x - goalPosition.x) >= 4){
+             //console.log("at the end")
+              goal = document.querySelector("#goal")
+              goal.setAttribute("visible",false)
+              textBox.setAttribute("text",{value: "You missed the teleporter you are still lost", align:"center"})
+              startMoving=false;
+              clearInterval(update);
+              setTimeout(function(){
+                  //kill music
+                  sounds.forEach(function(sound){
+                      sound.components.sound.stopSound()
+                  })
+              },1000) 
+              
+              setTimeout(function(){
+                  location.reload();
+              },2000)
           }
       }
       
@@ -249,6 +270,12 @@
                       sound.components.sound.stopSound()
                   })
               },1000)
+              
+              setTimeout(function(){
+                  location.reload();
+              },2000)
+              
+              
           }
           
           if(xDiff <= minDistance && zDiff <= minDistance && (object.getAttribute("class") == "coin" && object.getAttribute("visible") == true)){
