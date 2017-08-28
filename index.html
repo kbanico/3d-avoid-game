@@ -82,9 +82,14 @@
         
       var sounds = document.querySelectorAll(".sounds");
       var update = null;
+      var counter = 10;
+      
       
         
       window.onload=function(){
+          
+          
+          
          /* instructionBox.addEventListener("click",function(){
               setTimeout(function(){
                   startMoving = true;
@@ -92,9 +97,9 @@
           })*/
           
           
-          setTimeout(function(){
-              startMoving = true;
-          },5000)
+//          setTimeout(function(){
+//              startMoving = true;
+//          },5000)
           
           addEnemies();
           addCoins();
@@ -312,6 +317,22 @@
           
       }
       
+      
+    var countdown = setInterval(function(){
+        counter--;
+        
+        textBox.setAttribute("text",{value:"Countdown " + counter,width:10,height:2,align:"center"})
+        if(counter == 0){
+            clearInterval(countdown)
+            startMoving = true;
+            textBox.setAttribute("text",{value:"",width:10,height:2,align:"center"})
+        }
+        
+    },1000)
+      
+      
+      
+
       
       
       
